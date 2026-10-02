@@ -1,5 +1,4 @@
-const API_BASE_URL = "https://library-management-system-production-a628.up.railway.app/api";
-
+const API_BASE_URL = "/api";
 /* =====================================================
    SHOW MESSAGE
    ===================================================== */

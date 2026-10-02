@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <h2>📚 Library Member</h2>
+    <div class="nav-links">
+        <a href="memberbook.html">My Dashboard</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<main class="container">
+    <h1>Welcome, <span id="memberName">Member</span></h1>
+
+    <div class="card">
+        <h2>My Information</h2>
+        <p class="info-row"><b>ID:</b> <span id="memberId"></span></p>
+        <p class="info-row"><b>Name:</b> <span id="name"></span></p>
+        <p class="info-row"><b>Email:</b> <span id="email"></span></p>
+        <p class="info-row"><b>Phone:</b> <span id="phone"></span></p>
+        <p class="info-row"><b>Address:</b> <span id="address"></span></p>
+    </div>
+
+    <div class="card">
+        <h2>My Borrowed Books</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Author</th>
+                        <th>Issue Date</th>
+                        <th>Due Date</th>
+                        <th>Return Date</th>
+                        <th>Fine</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="myIssuesTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Available Books</h2>
+
+        <input id="searchInput" class="search-box"
+               placeholder="Search books">
+
+        <button onclick="searchAvailableBooks()">Search</button>
+        <button class="btn-secondary" onclick="loadAvailableBooks()">
+            Show All
+        </button>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>ISBN</th>
+                        <th>Available</th>
+                    </tr>
+                </thead>
+                <tbody id="availableBooksTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>My Reservations</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Reservation Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="myReservationsTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <p id="message" class="message"></p>
+</main>
+
+<script src="js/app.js"></script>
+<script src="js/memberbook.js"></script>
+</body>
+</html>

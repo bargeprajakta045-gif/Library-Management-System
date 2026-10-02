@@ -1,91 +1,73 @@
 requireMember();
 
-
-/* =====================================================
-   CURRENT MEMBER
-   ===================================================== */
-
-const currentMember =
-    getLoggedInMember();
-
+const currentMember = getLoggedInMember();
 
 if (!currentMember) {
-
-    window.location.href =
-        "index.html";
+    window.location.href = "index.html";
 }
 
 
-/* =====================================================
-   DISPLAY MEMBER INFORMATION
-   ===================================================== */
+// ===============================
+// MEMBER INFORMATION
+// ===============================
 
-document.getElementById(
-    "memberName"
-).textContent =
-    currentMember.name || "Member";
+const memberNameElement = document.getElementById("memberName");
+const memberIdElement = document.getElementById("memberId");
+const nameElement = document.getElementById("name");
+const emailElement = document.getElementById("email");
+const phoneElement = document.getElementById("phone");
+const addressElement = document.getElementById("address");
 
+if (memberNameElement) {
+    memberNameElement.textContent = currentMember.name || "Member";
+}
 
-document.getElementById(
-    "memberId"
-).textContent =
-    currentMember.id ?? "";
+if (memberIdElement) {
+    memberIdElement.textContent = currentMember.id ?? "";
+}
 
+if (nameElement) {
+    nameElement.textContent = currentMember.name || "";
+}
 
-document.getElementById(
-    "name"
-).textContent =
-    currentMember.name || "";
+if (emailElement) {
+    emailElement.textContent = currentMember.email || "";
+}
 
+if (phoneElement) {
+    phoneElement.textContent = currentMember.phone || "";
+}
 
-document.getElementById(
-    "email"
-).textContent =
-    currentMember.email || "";
-
-
-document.getElementById(
-    "phone"
-).textContent =
-    currentMember.phone || "";
-
-
-document.getElementById(
-    "address"
-).textContent =
-    currentMember.address || "";
+if (addressElement) {
+    addressElement.textContent = currentMember.address || "";
+}
 
 
-/* =====================================================
-   MY ISSUES
-   ===================================================== */
+// ===============================
+// MY BORROWED BOOKS
+// ===============================
 
 async function loadMyIssues() {
 
     try {
 
-        const issues =
-            await apiRequest(
-                "/issues/member/" +
-                currentMember.id
-            );
+        const issues = await apiRequest(
+            "/issues/member/" + currentMember.id
+        );
 
+        const table = document.getElementById("myIssuesTable");
 
-        const table =
-            document.getElementById(
-                "myIssuesTable"
-            );
-
+        if (!table) {
+            return;
+        }
 
         table.innerHTML = "";
-
 
         if (!issues || issues.length === 0) {
 
             table.innerHTML = `
                 <tr>
-                    <td colspan="7"
-                        style="text-align:center;">
+                    <td colspan="7" style="text-align:center;">
                         No borrowed books found.
                     </td>
                 </tr>
@@ -94,129 +76,92 @@ async function loadMyIssues() {
             return;
         }
 
-
         issues.forEach(issue => {
 
-            const row =
-                document.createElement("tr");
-
+            const row = document.createElement("tr");
 
             row.innerHTML = `
+                <td>${escapeHtml(issue.book?.bookName || "-")}</td>
+
+                <td>${escapeHtml(issue.book?.author || "-")}</td>
+
+                <td>${issue.issueDate || "-"}</td>
+
+                <td>${issue.dueDate || "-"}</td>
+
+                <td>${issue.returnDate || "Not Returned"}</td>
+
+                <td>₹${Number(issue.fine || 0)}</td>
 
                 <td>
-                    ${escapeHtml(
-                        issue.book?.bookName || ""
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHtml(
-                        issue.book?.author || ""
-                    )}
-                </td>
-
-                <td>
-                    ${issue.issueDate || ""}
-                </td>
-
-                <td>
-                    ${issue.dueDate || ""}
-                </td>
-
-                <td>
-                    ${issue.returnDate || "Not Returned"}
-                </td>
-
-                <td>
-                    ₹${Number(issue.fine || 0)}
-                </td>
-
-                <td>
-                    ${
-                        issue.returnDate
-                        ? "Returned"
-                        : "Issued"
-                    }
+                    ${issue.returnDate ? "Returned" : "Issued"}
                 </td>
             `;
-
 
             table.appendChild(row);
         });
 
-
     } catch (error) {
 
-        console.error(
-            "Load My Issues Error:",
-            error
-        );
-
+        console.error("Load My Issues Error:", error);
 
         showMessage(
-            "Unable to load your borrowed books.",
+            error.message || "Unable to load your borrowed books.",
             "error"
         );
     }
 }
 
 
-/* =====================================================
-   AVAILABLE BOOKS
-   ===================================================== */
+// ===============================
+// AVAILABLE BOOKS
+// ===============================
 
 async function loadAvailableBooks() {
 
     try {
 
-        const books =
-            await apiRequest(
-                "/books/available"
-            );
+        // GET ALL BOOKS
+        const books = await apiRequest("/books");
 
-
-        renderAvailableBooks(
-            books
+        // SHOW ONLY AVAILABLE BOOKS
+        const availableBooks = (books || []).filter(book =>
+            Number(book.availableQuantity || 0) > 0
         );
 
+        renderAvailableBooks(availableBooks);
 
     } catch (error) {
 
-        console.error(
-            "Load Available Books Error:",
-            error
-        );
-
+        console.error("Load Available Books Error:", error);
 
         showMessage(
-            "Unable to load available books.",
+            error.message || "Unable to load available books.",
             "error"
         );
     }
 }
 
 
-/* =====================================================
-   DISPLAY AVAILABLE BOOKS
-   ===================================================== */
+// ===============================
+// DISPLAY AVAILABLE BOOKS
+// ===============================
 
 function renderAvailableBooks(books) {
 
-    const table =
-        document.getElementById(
-            "availableBooksTable"
-        );
+    const table = document.getElementById("availableBooksTable");
 
+    if (!table) {
+        return;
+    }
 
     table.innerHTML = "";
-
 
     if (!books || books.length === 0) {
 
         table.innerHTML = `
             <tr>
-                <td colspan="5"
-                    style="text-align:center;">
+                <td colspan="5" style="text-align:center;">
                     No available books found.
                 </td>
             </tr>
@@ -225,62 +170,52 @@ function renderAvailableBooks(books) {
         return;
     }
 
-
     books.forEach(book => {
 
-        const row =
-            document.createElement("tr");
-
+        const row = document.createElement("tr");
 
         row.innerHTML = `
-
             <td>
-                ${escapeHtml(
-                    book.bookName
-                )}
+                ${escapeHtml(book.bookName || "-")}
             </td>
 
             <td>
-                ${escapeHtml(
-                    book.author
-                )}
+                ${escapeHtml(book.author || "-")}
             </td>
 
             <td>
-                ${escapeHtml(
-                    book.category || ""
-                )}
+                ${escapeHtml(book.category || "-")}
             </td>
 
             <td>
-                ${escapeHtml(
-                    book.isbn
-                )}
+                ${escapeHtml(book.isbn || "-")}
             </td>
 
             <td>
-                ${book.availableQuantity}
+                ${book.availableQuantity ?? 0}
             </td>
         `;
-
 
         table.appendChild(row);
     });
 }
 
 
-/* =====================================================
-   SEARCH AVAILABLE BOOKS
-   ===================================================== */
+// ===============================
+// SEARCH AVAILABLE BOOKS
+// ===============================
 
 async function searchAvailableBooks() {
 
-    const keyword =
-        document
-            .getElementById("searchInput")
-            .value
-            .trim();
+    const searchElement =
+        document.getElementById("searchInput");
 
+    if (!searchElement) {
+        return;
+    }
+
+    const keyword =
+        searchElement.value.trim();
 
     if (!keyword) {
 
@@ -289,79 +224,58 @@ async function searchAvailableBooks() {
         return;
     }
 
-
     try {
 
-        const books =
-            await apiRequest(
-                "/books/search?keyword=" +
-                encodeURIComponent(keyword)
-            );
-
-
-        const availableBooks =
-            books.filter(
-                book =>
-                    Number(
-                        book.availableQuantity
-                    ) > 0
-            );
-
-
-        renderAvailableBooks(
-            availableBooks
+        const books = await apiRequest(
+            "/books/search?keyword=" +
+            encodeURIComponent(keyword)
         );
 
+        const availableBooks =
+            (books || []).filter(book =>
+                Number(book.availableQuantity || 0) > 0
+            );
+
+        renderAvailableBooks(availableBooks);
 
     } catch (error) {
 
-        console.error(
-            "Search Books Error:",
-            error
-        );
-
+        console.error("Search Books Error:", error);
 
         showMessage(
-            "Book search failed.",
+            error.message || "Book search failed.",
             "error"
         );
     }
 }
 
 
-/* =====================================================
-   MY RESERVATIONS
-   ===================================================== */
+// ===============================
+// MY RESERVATIONS
+// ===============================
 
 async function loadMyReservations() {
 
     try {
 
-        const reservations =
-            await apiRequest(
-                "/reservations/member/" +
-                currentMember.id
-            );
-
+        const reservations = await apiRequest(
+            "/reservations/member/" + currentMember.id
+        );
 
         const table =
-            document.getElementById(
-                "myReservationsTable"
-            );
+            document.getElementById("myReservationsTable");
 
+        if (!table) {
+            return;
+        }
 
         table.innerHTML = "";
 
-
-        if (
-            !reservations ||
-            reservations.length === 0
-        ) {
+        if (!reservations || reservations.length === 0) {
 
             table.innerHTML = `
                 <tr>
-                    <td colspan="3"
-                        style="text-align:center;">
+                    <td colspan="3" style="text-align:center;">
                         No reservations found.
                     </td>
                 </tr>
@@ -370,36 +284,30 @@ async function loadMyReservations() {
             return;
         }
 
-
         reservations.forEach(reservation => {
 
-            const row =
-                document.createElement("tr");
-
+            const row = document.createElement("tr");
 
             row.innerHTML = `
-
                 <td>
                     ${escapeHtml(
-                        reservation.book?.bookName || ""
+                        reservation.book?.bookName || "-"
                     )}
                 </td>
 
                 <td>
-                    ${reservation.reservationDate || ""}
+                    ${reservation.reservationDate || "-"}
                 </td>
 
                 <td>
                     ${escapeHtml(
-                        reservation.status || ""
+                        reservation.status || "-"
                     )}
                 </td>
             `;
 
-
             table.appendChild(row);
         });
-
 
     } catch (error) {
 
@@ -408,18 +316,17 @@ async function loadMyReservations() {
             error
         );
 
-
         showMessage(
-            "Unable to load your reservations.",
+            "Reservations are not available yet.",
             "error"
         );
     }
 }
 
 
-/* =====================================================
-   START
-   ===================================================== */
+// ===============================
+// LOAD DATA
+// ===============================
 
 loadMyIssues();
 

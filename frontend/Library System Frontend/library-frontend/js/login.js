@@ -1,82 +1,202 @@
-async function login()  {
-    alert("LOGIN FUNCTION WORKING");
-    const logintype = document.getElementById("loginType").value;
+/* =====================================================
+   LOGIN
+   ===================================================== */
 
-alert("Selected Login Type = " + loginType);
+async function login() {
 
-    const loginType = document.getElementById("loginType").value;
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const message = document.getElementById("message");
+    const loginType =
+        document.getElementById("loginType").value;
 
-    if (!username || !password) {
-        message.innerHTML = `
-            <div class="alert alert-danger">
-                Please enter username/email and password.
-            </div>
-        `;
+
+    const username =
+        document.getElementById("username").value.trim();
+
+
+    const password =
+        document.getElementById("password").value.trim();
+
+
+    const message =
+        document.getElementById("message");
+
+
+    console.log(
+        "Login Type:",
+        loginType
+    );
+
+
+    console.log(
+        "Username:",
+        username
+    );
+
+
+    /* =================================================
+       VALIDATION
+       ================================================= */
+
+    if (!loginType) {
+
+        message.innerHTML =
+            "Please select Admin or Member.";
+
+        message.className =
+            "message error";
+
         return;
     }
 
+
+    if (!username || !password) {
+
+        message.innerHTML =
+            "Please enter username and password.";
+
+        message.className =
+            "message error";
+
+        return;
+    }
+
+
     try {
 
-        // ================= ADMIN LOGIN =================
+
+        /* =============================================
+           ADMIN LOGIN
+           ============================================= */
 
         if (loginType === "admin") {
 
-            const data = await apiRequest("/admin/login", {
-                method: "POST",
-                body: JSON.stringify({
-                    username: username,
-                    password: password
-                })
-            });
+            if (
+                username === "admin" &&
+                password === "admin123"
+            ) {
 
-            // Clear previous member login
-            localStorage.clear();
+                localStorage.clear();
 
-            localStorage.setItem("userType", "admin");
-            localStorage.setItem("userId", data.id);
+                sessionStorage.clear();
 
-            // ADMIN DASHBOARD
-            window.location.href = "dashboard.html";
 
-            return;
+                localStorage.setItem(
+                    "userType",
+                    "admin"
+                );
+
+
+                localStorage.setItem(
+                    "userId",
+                    "admin"
+                );
+
+
+                sessionStorage.setItem(
+                    "userRole",
+                    "admin"
+                );
+
+
+                window.location.href =
+                    "dashboard.html";
+
+
+                return;
+            }
+
+
+            throw new Error(
+                "Invalid admin username or password."
+            );
         }
 
 
-        // ================= MEMBER LOGIN =================
+        /* =============================================
+           MEMBER LOGIN
+           ============================================= */
 
         if (loginType === "member") {
 
-            const data = await apiRequest("/members/login", {
-                method: "POST",
-                body: JSON.stringify({
-                    email: username,
-                    password: password
-                })
-            });
 
-            // Clear previous admin login
+            const data =
+                await apiRequest(
+                    "/members/login",
+                    {
+                        method: "POST",
+
+                        body:
+                            JSON.stringify({
+                                username: username,
+                                password: password
+                            })
+                    }
+                );
+
+
+            console.log(
+                "MEMBER LOGIN SUCCESS:",
+                data
+            );
+
+
+            /* Clear old login data */
+
             localStorage.clear();
 
-            localStorage.setItem("userType", "member");
-            localStorage.setItem("userId", data.id);
+            sessionStorage.clear();
 
-            // MEMBER DASHBOARD
-            window.location.href = "member-dashboard.html";
+
+            /* Save member login */
+
+            localStorage.setItem(
+                "userType",
+                "member"
+            );
+
+
+            localStorage.setItem(
+                "userId",
+                data.id
+            );
+
+
+            /* Save complete member */
+
+            sessionStorage.setItem(
+                "loggedInMember",
+                JSON.stringify(data)
+            );
+
+
+            sessionStorage.setItem(
+                "userRole",
+                "member"
+            );
+
+
+            /* Go to member dashboard */
+
+            window.location.href =
+                "memberbook.html";
+
 
             return;
         }
 
     } catch (error) {
 
-        console.error("Login Error:", error);
+        console.error(
+            "LOGIN ERROR:",
+            error
+        );
 
-        message.innerHTML = `
-            <div class="alert alert-danger">
-                ${error.message}
-            </div>
-        `;
+
+        message.innerHTML =
+            error.message ||
+            "Login failed. Check username and password.";
+
+
+        message.className =
+            "message error";
     }
 }

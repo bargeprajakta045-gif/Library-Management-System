@@ -26,6 +26,16 @@ async function loadOptions() {
             document.getElementById("memberId");
 
 
+        if (!bookSelect || !memberSelect) {
+
+            console.error(
+                "Book or Member select not found."
+            );
+
+            return;
+        }
+
+
         bookSelect.innerHTML =
             '<option value="">Select Book</option>';
 
@@ -34,40 +44,56 @@ async function loadOptions() {
             '<option value="">Select Member</option>';
 
 
-        books.forEach(book => {
+        /* =============================================
+           BOOKS
+           ============================================= */
 
-            const option =
-                document.createElement("option");
+        if (books && books.length > 0) {
 
+            books.forEach(book => {
 
-            option.value =
-                book.id;
-
-
-            option.textContent =
-                `${book.bookName} (Available: ${book.availableQuantity})`;
+                const option =
+                    document.createElement("option");
 
 
-            bookSelect.appendChild(option);
-        });
+                option.value =
+                    book.id;
 
 
-        members.forEach(member => {
-
-            const option =
-                document.createElement("option");
+                option.textContent =
+                    `${book.bookName} (Available: ${book.availableQuantity})`;
 
 
-            option.value =
-                member.id;
+                bookSelect.appendChild(option);
+
+            });
+        }
 
 
-            option.textContent =
-                `${member.name} - ${member.email}`;
+        /* =============================================
+           MEMBERS
+           ============================================= */
+
+        if (members && members.length > 0) {
+
+            members.forEach(member => {
+
+                const option =
+                    document.createElement("option");
 
 
-            memberSelect.appendChild(option);
-        });
+                option.value =
+                    member.id;
+
+
+                option.textContent =
+                    `${member.name} - ${member.username || member.email}`;
+
+
+                memberSelect.appendChild(option);
+
+            });
+        }
 
 
     } catch (error) {
@@ -90,82 +116,96 @@ async function loadOptions() {
    ISSUE BOOK
    ===================================================== */
 
-document
-    .getElementById("issueForm")
-    .addEventListener("submit", async function (event) {
-
-        event.preventDefault();
+const issueForm =
+    document.getElementById("issueForm");
 
 
-        const bookId =
-            Number(
-                document.getElementById("bookId").value
-            );
+if (issueForm) {
+
+    issueForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
 
 
-        const memberId =
-            Number(
-                document.getElementById("memberId").value
-            );
+            const bookId =
+                Number(
+                    document.getElementById("bookId").value
+                );
 
 
-        if (!bookId || !memberId) {
+            const memberId =
+                Number(
+                    document.getElementById("memberId").value
+                );
 
-            showMessage(
-                "Select both book and member.",
-                "error"
-            );
 
-            return;
+            if (!bookId || !memberId) {
+
+                showMessage(
+                    "Select both book and member.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            try {
+
+                /*
+                 Backend expects:
+
+                 @RequestParam Long bookId
+                 @RequestParam Long memberId
+
+                 Therefore parameters are sent
+                 in URL.
+                */
+
+                await apiRequest(
+                    "/issues/issue?bookId=" +
+                    bookId +
+                    "&memberId=" +
+                    memberId,
+                    {
+                        method: "POST"
+                    }
+                );
+
+
+                showMessage(
+                    "Book issued successfully."
+                );
+
+
+                issueForm.reset();
+
+
+                await loadOptions();
+
+                await loadIssues();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Issue Book Error:",
+                    error
+                );
+
+
+                showMessage(
+                    error.message ||
+                    "Could not issue book. Check available quantity.",
+                    "error"
+                );
+            }
+
         }
-
-
-        try {
-
-            await apiRequest(
-                "/issues/issue",
-                {
-                    method: "POST",
-
-                    body:
-                        JSON.stringify({
-                            bookId: bookId,
-                            memberId: memberId
-                        })
-                }
-            );
-
-
-            showMessage(
-                "Book issued successfully."
-            );
-
-
-            document
-                .getElementById("issueForm")
-                .reset();
-
-
-            await loadOptions();
-
-            await loadIssues();
-
-
-        } catch (error) {
-
-            console.error(
-                "Issue Book Error:",
-                error
-            );
-
-
-            showMessage(
-                "Could not issue book. Check available quantity.",
-                "error"
-            );
-        }
-
-    });
+    );
+}
 
 
 /* =====================================================
@@ -181,7 +221,15 @@ async function loadIssues() {
 
 
         const table =
-            document.getElementById("issuesTable");
+            document.getElementById(
+                "issuesTable"
+            );
+
+
+        if (!table) {
+
+            return;
+        }
 
 
         table.innerHTML = "";
@@ -191,7 +239,8 @@ async function loadIssues() {
 
             table.innerHTML = `
                 <tr>
-                    <td colspan="8" style="text-align:center;">
+                    <td colspan="8"
+                        style="text-align:center;">
                         No issue records found.
                     </td>
                 </tr>
@@ -209,26 +258,28 @@ async function loadIssues() {
 
             row.innerHTML = `
 
-                <td>${issue.id}</td>
+                <td>
+                    ${issue.id}
+                </td>
 
                 <td>
                     ${escapeHtml(
-                        issue.book?.bookName || ""
+                        issue.book?.bookName || "-"
                     )}
                 </td>
 
                 <td>
                     ${escapeHtml(
-                        issue.member?.name || ""
+                        issue.member?.name || "-"
                     )}
                 </td>
 
                 <td>
-                    ${issue.issueDate || ""}
+                    ${issue.issueDate || "-"}
                 </td>
 
                 <td>
-                    ${issue.dueDate || ""}
+                    ${issue.dueDate || "-"}
                 </td>
 
                 <td>
@@ -246,12 +297,14 @@ async function loadIssues() {
 
                         ? "Returned"
 
-                        : `
-                            <button
-                                class="btn-success"
-                                onclick="returnBook(${issue.id})">
-                                Return
-                            </button>
+                        :
+
+                        `
+                        <button
+                            class="btn-success"
+                            onclick="returnBook(${issue.id})">
+                            Return
+                        </button>
                         `
                     }
 
@@ -260,6 +313,7 @@ async function loadIssues() {
 
 
             table.appendChild(row);
+
         });
 
 
@@ -272,6 +326,7 @@ async function loadIssues() {
 
 
         showMessage(
+            error.message ||
             "Unable to load issue records.",
             "error"
         );
@@ -290,6 +345,7 @@ async function returnBook(id) {
             "Confirm book return?"
         )
     ) {
+
         return;
     }
 
@@ -323,6 +379,7 @@ async function returnBook(id) {
 
 
         showMessage(
+            error.message ||
             "Could not return book.",
             "error"
         );

@@ -43,7 +43,7 @@ function renderMembers(members) {
 
         table.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align:center;">
+                <td colspan="7" style="text-align:center;">
                     No members found.
                 </td>
             </tr>
@@ -61,14 +61,20 @@ function renderMembers(members) {
 
         row.innerHTML = `
 
-            <td>${member.id}</td>
-
             <td>
-                ${escapeHtml(member.name)}
+                ${member.id}
             </td>
 
             <td>
-                ${escapeHtml(member.email)}
+                ${escapeHtml(member.name || "")}
+            </td>
+
+            <td>
+                ${escapeHtml(member.email || "")}
+            </td>
+
+            <td>
+                ${escapeHtml(member.username || "")}
             </td>
 
             <td>
@@ -83,13 +89,18 @@ function renderMembers(members) {
 
                 <button
                     onclick="editMember(${member.id})">
+
                     Edit
+
                 </button>
+
 
                 <button
                     class="btn-danger"
                     onclick="deleteMember(${member.id})">
+
                     Delete
+
                 </button>
 
             </td>
@@ -97,6 +108,7 @@ function renderMembers(members) {
 
 
         table.appendChild(row);
+
     });
 }
 
@@ -107,139 +119,152 @@ function renderMembers(members) {
 
 document
     .getElementById("memberForm")
-    .addEventListener("submit", async function (event) {
+    .addEventListener(
+        "submit",
+        async function (event) {
 
-        event.preventDefault();
-
-
-        const id =
-            document.getElementById("memberId").value;
+            event.preventDefault();
 
 
-        const member = {
-
-            name:
+            const id =
                 document
-                    .getElementById("name")
-                    .value
-                    .trim(),
+                    .getElementById("memberId")
+                    .value;
 
-            email:
+
+            const member = {
+
+                name:
+                    document
+                        .getElementById("name")
+                        .value
+                        .trim(),
+
+                email:
+                    document
+                        .getElementById("email")
+                        .value
+                        .trim(),
+
+                username:
+                    document
+                        .getElementById("username")
+                        .value
+                        .trim(),
+
+                phone:
+                    document
+                        .getElementById("phone")
+                        .value
+                        .trim(),
+
+                address:
+                    document
+                        .getElementById("address")
+                        .value
+                        .trim()
+            };
+
+
+            const password =
                 document
-                    .getElementById("email")
-                    .value
-                    .trim(),
-
-            phone:
-                document
-                    .getElementById("phone")
-                    .value
-                    .trim(),
-
-            address:
-                document
-                    .getElementById("address")
-                    .value
-                    .trim()
-        };
+                    .getElementById("password")
+                    .value;
 
 
-        const password =
-            document
-                .getElementById("password")
-                .value;
+            /* Password required for new member */
 
-
-        /* Password required for new member */
-
-        if (!id && !password) {
-
-            showMessage(
-                "Password is required for a new member.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        /* Add password if entered */
-
-        if (password) {
-
-            member.password = password;
-        }
-
-
-        try {
-
-            /* =========================
-               UPDATE MEMBER
-               ========================= */
-
-            if (id) {
-
-                await apiRequest(
-                    "/members/" + id,
-                    {
-                        method: "PUT",
-
-                        body:
-                            JSON.stringify(member)
-                    }
-                );
-
+            if (!id && !password) {
 
                 showMessage(
-                    "Member updated successfully."
+                    "Password is required for a new member.",
+                    "error"
                 );
+
+                return;
+            }
+
+
+            /* Add password if entered */
+
+            if (password) {
+
+                member.password = password;
 
             }
 
 
-            /* =========================
-               ADD MEMBER
-               ========================= */
+            try {
 
-            else {
+                /* =========================
+                   UPDATE MEMBER
+                   ========================= */
 
-                await apiRequest(
-                    "/members",
-                    {
-                        method: "POST",
+                if (id) {
 
-                        body:
-                            JSON.stringify(member)
-                    }
+                    await apiRequest(
+                        "/members/" + id,
+                        {
+                            method: "PUT",
+
+                            body:
+                                JSON.stringify(member)
+                        }
+                    );
+
+
+                    showMessage(
+                        "Member updated successfully."
+                    );
+
+                }
+
+
+                /* =========================
+                   ADD MEMBER
+                   ========================= */
+
+                else {
+
+                    await apiRequest(
+                        "/members",
+                        {
+                            method: "POST",
+
+                            body:
+                                JSON.stringify(member)
+                        }
+                    );
+
+
+                    showMessage(
+                        "Member added successfully."
+                    );
+
+                }
+
+
+                resetMemberForm();
+
+                await loadMembers();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Save Member Error:",
+                    error
                 );
 
 
                 showMessage(
-                    "Member added successfully."
+                    "Could not save member.",
+                    "error"
                 );
             }
 
-
-            resetMemberForm();
-
-            await loadMembers();
-
-
-        } catch (error) {
-
-            console.error(
-                "Save Member Error:",
-                error
-            );
-
-
-            showMessage(
-                "Could not save member. Check if email already exists.",
-                "error"
-            );
         }
-
-    });
+    );
 
 
 /* =====================================================
@@ -255,7 +280,9 @@ function editMember(id) {
 
 
     if (!member) {
+
         return;
+
     }
 
 
@@ -264,11 +291,15 @@ function editMember(id) {
 
 
     document.getElementById("name").value =
-        member.name;
+        member.name || "";
 
 
     document.getElementById("email").value =
-        member.email;
+        member.email || "";
+
+
+    document.getElementById("username").value =
+        member.username || "";
 
 
     document.getElementById("phone").value =
@@ -292,9 +323,13 @@ function editMember(id) {
 
 
     window.scrollTo({
+
         top: 0,
+
         behavior: "smooth"
+
     });
+
 }
 
 
@@ -309,7 +344,9 @@ async function deleteMember(id) {
             "Are you sure you want to delete this member?"
         )
     ) {
+
         return;
+
     }
 
 
@@ -340,10 +377,11 @@ async function deleteMember(id) {
 
 
         showMessage(
-            "Could not delete member. Check related issue records.",
+            "Could not delete member.",
             "error"
         );
     }
+
 }
 
 
@@ -358,14 +396,16 @@ function resetMemberForm() {
         .reset();
 
 
-    document.getElementById("memberId").value =
-        "";
+    document
+        .getElementById("memberId")
+        .value = "";
 
 
-    document.getElementById(
-        "memberFormTitle"
-    ).textContent =
+    document
+        .getElementById("memberFormTitle")
+        .textContent =
         "Add Member";
+
 }
 
 

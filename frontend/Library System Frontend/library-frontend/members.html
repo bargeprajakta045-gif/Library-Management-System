@@ -1,91 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Manage Members</title>
-    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="stylesheet"
+          href="css/style.css">
+
 </head>
+
 <body>
 
 <nav class="navbar">
+
     <h2>📚 Library Admin</h2>
+
     <div class="nav-links">
+
         <a href="dashboard.html">Dashboard</a>
+
         <a href="books.html">Books</a>
+
         <a href="members.html">Members</a>
+
         <a href="issue-return.html">Issue / Return</a>
+
         <a href="reservations.html">Reservations</a>
+
         <a href="#" onclick="logout()">Logout</a>
+
     </div>
+
 </nav>
 
+
 <main class="container">
+
     <h1>Manage Members</h1>
 
+
+    <!-- ================= ADD / UPDATE MEMBER ================= -->
+
     <div class="card">
-        <h2 id="memberFormTitle">Add Member</h2>
+
+        <h2 id="memberFormTitle">
+            Add Member
+        </h2>
+
 
         <form id="memberForm">
-            <input type="hidden" id="memberId">
+
+            <input type="hidden"
+                   id="memberId">
+
 
             <div class="form-grid">
+
+
+                <!-- NAME -->
+
                 <div class="form-group">
+
                     <label>Name</label>
-                    <input id="name" required>
+
+                    <input
+                        id="name"
+                        type="text"
+                        required>
+
                 </div>
 
+
+                <!-- EMAIL -->
+
                 <div class="form-group">
+
                     <label>Email</label>
-                    <input id="email" type="email" required>
+
+                    <input
+                        id="email"
+                        type="email"
+                        required>
+
                 </div>
 
+
+                <!-- USERNAME -->
+
                 <div class="form-group">
+
+                    <label>Username</label>
+
+                    <input
+                        id="username"
+                        type="text"
+                        required>
+
+                </div>
+
+
+                <!-- PHONE -->
+
+                <div class="form-group">
+
                     <label>Phone</label>
-                    <input id="phone">
+
+                    <input
+                        id="phone"
+                        type="text">
+
                 </div>
 
+
+                <!-- ADDRESS -->
+
                 <div class="form-group">
+
                     <label>Address</label>
-                    <input id="address">
+
+                    <input
+                        id="address"
+                        type="text">
+
                 </div>
+
+
+                <!-- PASSWORD -->
 
                 <div class="form-group">
+
                     <label>Password</label>
-                    <input id="password" type="password">
+
+                    <input
+                        id="password"
+                        type="password">
+
                 </div>
 
-                <button type="submit" class="btn-success">Save Member</button>
-                <button type="button" class="btn-secondary"
-                        onclick="resetMemberForm()">Clear</button>
+
+                <!-- SAVE -->
+
+                <button
+                    type="submit"
+                    class="btn-success">
+
+                    Save Member
+
+                </button>
+
+
+                <!-- CLEAR -->
+
+                <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="resetMemberForm()">
+
+                    Clear
+
+                </button>
+
             </div>
+
         </form>
 
-        <p id="message" class="message"></p>
+
+        <p id="message"
+           class="message"></p>
+
     </div>
+
+
+    <!-- ================= ALL MEMBERS ================= -->
 
     <div class="card">
+
         <h2>All Members</h2>
 
+
         <div class="table-wrap">
+
             <table>
+
                 <thead>
+
                     <tr>
+
                         <th>ID</th>
+
                         <th>Name</th>
+
                         <th>Email</th>
+
+                        <th>Username</th>
+
                         <th>Phone</th>
+
                         <th>Address</th>
+
                         <th>Actions</th>
+
                     </tr>
+
                 </thead>
+
+
                 <tbody id="membersTable"></tbody>
+
             </table>
+
         </div>
+
     </div>
+
 </main>
 
+
 <script src="js/app.js"></script>
+
 <script src="js/members.js"></script>
+
+
 </body>
+
 </html>
